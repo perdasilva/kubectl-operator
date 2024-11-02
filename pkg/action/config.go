@@ -2,6 +2,9 @@ package action
 
 import (
 	"context"
+	catalogdv1alpha1 "github.com/operator-framework/catalogd/api/core/v1alpha1"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/pflag"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -23,6 +26,7 @@ func NewScheme() (*runtime.Scheme, error) {
 		v1.AddToScheme,
 		apiextensionsv1.AddToScheme,
 		olmv1.AddToScheme,
+		catalogdv1alpha1.AddToScheme,
 	} {
 		if err := f(sch); err != nil {
 			return nil, err
@@ -36,6 +40,7 @@ type Configuration struct {
 	Namespace string
 	Scheme    *runtime.Scheme
 
+	CacheDir  string
 	overrides *clientcmd.ConfigOverrides
 }
 
@@ -89,6 +94,16 @@ func (c *Configuration) Load() error {
 	c.Scheme = sch
 	c.Client = &operatorClient{cl}
 	c.Namespace = ns
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	c.CacheDir = filepath.Join(home, ".olmv1", "cache")
+	if err := os.MkdirAll(c.CacheDir, 0755); err != nil {
+		return err
+	}
 
 	return nil
 }

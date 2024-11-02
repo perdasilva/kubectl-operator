@@ -17,6 +17,8 @@ func newOlmV1Cmd(cfg *action.Configuration) *cobra.Command {
 	cmd.AddCommand(
 		olmv1.NewOperatorInstallCmd(cfg),
 		olmv1.NewOperatorUninstallCmd(cfg),
+		olmv1.NewOlmv1ListCommand(cfg),
+		olmv1.NewCacheCatalogCommand(cfg),
 	)
 
 	return cmd
